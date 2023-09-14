@@ -35,6 +35,10 @@ return pool.query('SELECT * FROM users WHERE email = $1' ,[email])
 .then(data => {
   return data.rows[0]
 })
+.catch(err => {
+  console.error('An error occurred:', err);
+  throw err; 
+});
 
 };
 
@@ -54,7 +58,7 @@ const getUserWithId = function(id) {
     })
     .catch(err => {
       console.error('An error occurred:', err);
-      throw err; // Re-throw the error if you want it to propagate
+      throw err; 
     });
 };
 
@@ -65,12 +69,32 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
-const addUser = function (user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+// const addUser = function (user) {
+//   const userId = Object.keys(users).length + 1;
+//   user.id = userId;
+//   users[userId] = user;
+//   return Promise.resolve(user);
+// };
+const addUser = function(user) {
+  const query = `
+    INSERT INTO users (name, email, age)  -- specify the column names here
+    VALUES ($1, $2, $3)                    -- use parameterized queries for security
+    RETURNING *;                           -- returns the newly added row
+  `;
+
+  const values = [user.name, user.email, user.age];  // adjust the values to match your user object keys
+
+  return pool.query(query, values)
+    .then(data => {
+      return data.rows[0];
+    })
+    .catch(err => {
+      console.error('An error occurred:', err);
+      throw err;
+    });
 };
+
+exports.addUser = addUser;
 
 /// Reservations
 
