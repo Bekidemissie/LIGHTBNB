@@ -9,11 +9,12 @@ const pool = new Pool({
   port : 5432,
   database: 'lightbnb'
 });
-pool.connect(()=>
+pool.connect()
 {
-  console.log("connected my db");
-})
-pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.log(response)});
+  console.log("connected my db")
+
+ }
+//pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.log(response)});
 /// Users
 
 /**
@@ -22,14 +23,19 @@ pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.l
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function (email) {
-  let resolvedUser = null;
-  for (const userId in users) {
-    const user = users[userId];
-    if (user && user.email.toLowerCase() === email.toLowerCase()) {
-      resolvedUser = user;
-    }
-  }
-  return Promise.resolve(resolvedUser);
+  // let resolvedUser = null;
+  // for (const userId in users) {
+  //   const user = users[userId];
+  //   if (user && user.email.toLowerC 'ase() === email.toLowerCase()) {
+  //     resolvedUser = user;
+  //   }
+  // }
+  // return Promise.resolve(resolvedUser);
+return pool.query('SELECT * FROM users WHERE email = $1' ,[email])
+.then(data => {
+  return data.rows[0]
+})
+
 };
 
 /**
@@ -37,9 +43,22 @@ const getUserWithEmail = function (email) {
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithId = function (id) {
-  return Promise.resolve(users[id]);
+// const getUserWithId = function (id) {
+//  // return Promise.resolve(users[id]);
+
+// };
+const getUserWithId = function(id) {
+  return pool.query('SELECT * FROM users WHERE id = $1', [id])
+    .then(data => {
+      return data.rows[0];
+    })
+    .catch(err => {
+      console.error('An error occurred:', err);
+      throw err; // Re-throw the error if you want it to propagate
+    });
 };
+
+exports.getUserWithId = getUserWithId;
 
 /**
  * Add a new user to the database.
