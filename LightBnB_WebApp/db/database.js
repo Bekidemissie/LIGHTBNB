@@ -62,7 +62,7 @@ const getUserWithId = function(id) {
     });
 };
 
-exports.getUserWithId = getUserWithId;
+
 
 /**
  * Add a new user to the database.
@@ -75,7 +75,8 @@ exports.getUserWithId = getUserWithId;
 //   users[userId] = user;
 //   return Promise.resolve(user);
 // };
-const addUser = function(user) {
+
+const addUser = async function(user) {
   const query = `
     INSERT INTO users (name, email, age)  -- specify the column names here
     VALUES ($1, $2, $3)                    -- use parameterized queries for security
@@ -84,17 +85,16 @@ const addUser = function(user) {
 
   const values = [user.name, user.email, user.age];  // adjust the values to match your user object keys
 
-  return pool.query(query, values)
-    .then(data => {
-      return data.rows[0];
-    })
-    .catch(err => {
-      console.error('An error occurred:', err);
-      throw err;
-    });
+  try {
+    const data = await pool.query(query, values);
+    return data.rows[0];
+  } catch (err) {
+    console.error('An error occurred:', err);
+    throw err;
+  }
 };
 
-exports.addUser = addUser;
+
 
 /// Reservations
 
@@ -103,9 +103,31 @@ exports.addUser = addUser;
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+// const getAllReservations = function (guest_id, limit = 10) {
+//   return getAllProperties(null, 2);
+// };
+const getAllReservations = function(guest_id, limit = 10) {
+  const queryString = `
+    SELECT *
+    FROM reservations
+    WHERE guest_id = $1
+    LIMIT $2;
+  `;
+
+  const queryParams = [guest_id, limit];
+
+  return pool.query(queryString, queryParams)
+    .then(data => {
+      return data.rows;
+    })
+    .catch(err => {
+      console.error('An error occurred:', err);
+      throw err;
+    });
 };
+
+exports.getAllReservations = getAllReservations;
+
 
 /// Properties
 
@@ -115,13 +137,41 @@ const getAllReservations = function (guest_id, limit = 10) {
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
-const getAllProperties = function (options, limit = 10) {
-  const limitedProperties = {};
-  for (let i = 1; i <= limit; i++) {
-    limitedProperties[i] = properties[i];
+// const getAllProperties = function (options, limit = 10) {
+//   const limitedProperties = {};
+//   for (let i = 1; i <= limit; i++) {
+//     limitedProperties[i] = properties[i];
+//   }
+//   return Promise.resolve(limitedProperties);
+// };
+const getAllProperties =  async function(options, limit = 10) {
+  let queryParams = []; 
+  let queryString = `
+    SELECT *
+    FROM properties
+  `;
+
+  if (options.city) {
+    queryParams.push(`%${options.city}%`);
+    queryString += `WHERE city LIKE $${queryParams.length} `;
   }
-  return Promise.resolve(limitedProperties);
+
+  queryParams.push(limit);
+  queryString += `
+    LIMIT $${queryParams.length};
+  `;
+
+  return pool.query(queryString, queryParams)
+    .then(data => {
+      return data.rows;
+    })
+    .catch(err => {
+      console.error('An error occurred:', err);
+      throw err;
+    });
 };
+
+
 
 /**
  * Add a property to the database
