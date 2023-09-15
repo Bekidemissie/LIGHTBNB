@@ -18,15 +18,14 @@ pool.connect()
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithEmail = function (email) {
-  return pool.query('SELECT * FROM users WHERE email = $1', [email])
-    .then(data => {
-      return data.rows[0]
-    })
-    .catch(err => {
-      console.error('An error occurred:', err);
-      throw err;
-    });
+const getUserWithEmail = async function (email) {
+  try {
+    const data = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    return data.rows[0];
+  } catch (err) {
+    console.error('An error occurred:', err);
+    throw err;
+  }
 
 };
 
@@ -37,15 +36,14 @@ const getUserWithEmail = function (email) {
  */
 // const getUserWithId = function (id) {
 
-const getUserWithId = function (id) {
-  return pool.query('SELECT * FROM users WHERE id = $1', [id])
-    .then(data => {
-      return data.rows[0];
-    })
-    .catch(err => {
-      console.error('An error occurred:', err);
-      throw err;
-    });
+const getUserWithId = async function (id) {
+  try {
+    const data = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    return data.rows[0];
+  } catch (err) {
+    console.error('An error occurred:', err);
+    throw err;
+  }
 };
 
 
@@ -77,26 +75,22 @@ const addUser = async function (user) {
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = async function (guest_id, limit = 10) {
-  const queryString = `
-    SELECT *
-    FROM reservations
-    WHERE guest_id = $1
-    LIMIT $2;
-  `;
-
-  const queryParams = [guest_id, limit];
-
-  return pool.query(queryString, queryParams)
-    .then(data => {
-      return data.rows;
-    })
-    .catch(err => {
-      console.error('An error occurred:', err);
-      throw err;
-    });
+const getAllReservations = async function(guest_id, limit = 10) {
+  try {
+    const result = await pool
+      .query(`SELECT reservations.*, properties.*,avg(rating) as average_rating
+      FROM reservations
+      JOIN properties ON reservations.property_id = properties.id
+      JOIN property_reviews ON properties.id = property_reviews.property_id
+      WHERE reservations.guest_id = $1
+      GROUP BY properties.id, reservations.id
+      ORDER BY reservations.start_date
+      LIMIT $2;`, [guest_id, limit]);
+    return result.rows;
+  } catch (err) {
+    console.log(err.message);
+  }
 };
-
 
 /**
  * Get all properties.
@@ -105,7 +99,7 @@ const getAllReservations = async function (guest_id, limit = 10) {
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 
-const getAllProperties = function (options, limit = 10) {
+const getAllProperties = async function (options, limit = 10) {
   let queryParams = [];
   let queryString = `
     SELECT properties.*, avg(property_reviews.rating) as average_rating
@@ -128,14 +122,13 @@ const getAllProperties = function (options, limit = 10) {
     LIMIT $${queryParams.length};
   `;
 
-  return pool.query(queryString, queryParams)
-    .then(data => {
-      return data.rows;
-    })
-    .catch(err => {
-      console.error('An error occurred:', err);
-      throw err;
-    });
+  try {
+    const data = await pool.query(queryString, queryParams);
+    return data.rows;
+  } catch (err) {
+    console.error('An error occurred:', err);
+    throw err;
+  }
 };
 
 
