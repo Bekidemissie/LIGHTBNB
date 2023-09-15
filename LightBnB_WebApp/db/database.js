@@ -92,6 +92,8 @@ const getAllReservations = async function(guest_id, limit = 10) {
   }
 };
 
+pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.log(response)})
+
 /**
  * Get all properties.
  * @param {{}} options An object containing query options.
