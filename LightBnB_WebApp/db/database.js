@@ -13,6 +13,7 @@ pool.connect()
   .then(() => console.log("connected my db"))
   .catch(err => console.error('An error occurred:', err));
 
+pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => { console.log(response) })
 /**
  * Get a single user from the database given their email.
  * @param {String} email The email of the user.
@@ -75,7 +76,7 @@ const addUser = async function (user) {
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = async function(guest_id, limit = 10) {
+const getAllReservations = async function (guest_id, limit = 10) {
   try {
     const result = await pool
       .query(`SELECT reservations.*, properties.*,avg(rating) as average_rating
@@ -91,8 +92,6 @@ const getAllReservations = async function(guest_id, limit = 10) {
     console.log(err.message);
   }
 };
-
-pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.log(response)})
 
 /**
  * Get all properties.
