@@ -9,6 +9,7 @@ LightBnB Project
 This project is made by Bereket Yehualashet as part of Lighthouse Labs Web Development Flex Program curriculum.
 
 ### ERD table
+![lightbnb_ERD](https://github.com/Bekidemissie/LightBnB/assets/130595119/12d96bdc-f159-4246-9a71-333f5ec5a85e)
 
 ### final 
 
