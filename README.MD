@@ -7,6 +7,9 @@ With this app, users can login and find properties based on different search fil
 
 LightBnB Project
 This project is made by Bereket Yehualashet as part of Lighthouse Labs Web Development Flex Program curriculum.
+
+### ERD table
+
 ### final 
 
 ![Screenshot (16)](https://github.com/Bekidemissie/LightBnB/assets/130595119/02880546-e796-485b-9374-0b7d8479d06b)
